@@ -185,10 +185,6 @@ private:
     // PID of the process which last successfully called connect(...)
     pid_t mConnectedPid;
 
-    // mLinkedToDeath is used to set a binder death notification on
-    // the producer.
-    sp<IProducerListener> mLinkedToDeath;
-
     // mConnectedProducerListener is used to handle the onBufferReleased
     // notification.
     sp<IProducerListener> mConnectedProducerListener;
