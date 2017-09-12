@@ -91,18 +91,6 @@ static inline gralloc1_rect_t asGralloc1Rect(const Rect& rect) {
     return outRect;
 }
 
-extern "C" {
-
-extern status_t _ZN7android19GraphicBufferMapper4lockEPK13native_handlejRKNS_4RectEPPv(buffer_handle_t, uint32_t, const Rect&, void**);
-
-status_t _ZN7android19GraphicBufferMapper4lockEPK13native_handleiRKNS_4RectEPPv(buffer_handle_t handle,
-        int usage, const Rect& bounds, void** vaddr)
-{
-    return _ZN7android19GraphicBufferMapper4lockEPK13native_handlejRKNS_4RectEPPv(handle, static_cast<uint32_t>(usage), bounds, vaddr);
-}
-
-}
-
 status_t GraphicBufferMapper::lock(buffer_handle_t handle, uint32_t usage,
         const Rect& bounds, void** vaddr)
 {
