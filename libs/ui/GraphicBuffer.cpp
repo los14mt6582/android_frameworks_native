@@ -34,6 +34,33 @@ namespace android {
 // Buffer and implementation of ANativeWindowBuffer
 // ===========================================================================
 
+class GraphicBufferStubDecker {
+ public:
+  ~GraphicBufferStubDecker();
+  GraphicBufferStubDecker(uint32_t inWidth, uint32_t inHeight,
+        PixelFormat inFormat, uint32_t inUsage);
+  sp<android::GraphicBuffer> mBuffer;
+};
+
+GraphicBufferStubDecker::GraphicBufferStubDecker(uint32_t inWidth, uint32_t inHeight,
+        PixelFormat inFormat, uint32_t inUsage)
+  : mBuffer(new android::GraphicBuffer(inWidth, inHeight, inFormat, inUsage)) {
+ } // constructors take base initializers
+
+GraphicBufferStubDecker::~GraphicBufferStubDecker() {} // деструктор
+
+// экспорт
+extern "C" {
+
+void _ZN7android13GraphicBufferC1Ejjij(uint32_t inWidth, uint32_t inHeight,
+        PixelFormat inFormat, uint32_t inUsage); // прототип
+
+void _ZN7android13GraphicBufferC1Ejjij(uint32_t inWidth, uint32_t inHeight,
+        PixelFormat inFormat, uint32_t inUsage) {
+	GraphicBufferStubDecker::GraphicBufferStubDecker(inWidth, inHeight, inFormat, inUsage);
+}
+}
+
 static uint64_t getUniqueId() {
     static volatile int32_t nextId = 0;
     uint64_t id = static_cast<uint64_t>(getpid()) << 32;
