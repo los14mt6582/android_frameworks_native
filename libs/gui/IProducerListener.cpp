@@ -22,7 +22,6 @@ namespace android {
 
 enum {
     ON_BUFFER_RELEASED = IBinder::FIRST_CALL_TRANSACTION,
-    NEEDS_RELEASE_NOTIFY,
 };
 
 class BpProducerListener : public BpInterface<IProducerListener>
@@ -37,23 +36,6 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IProducerListener::getInterfaceDescriptor());
         remote()->transact(ON_BUFFER_RELEASED, data, &reply, IBinder::FLAG_ONEWAY);
-    }
-
-    virtual bool needsReleaseNotify() {
-        bool result;
-        Parcel data, reply;
-        data.writeInterfaceToken(IProducerListener::getInterfaceDescriptor());
-        status_t err = remote()->transact(NEEDS_RELEASE_NOTIFY, data, &reply);
-        if (err != NO_ERROR) {
-            ALOGE("IProducerListener: binder call \'needsReleaseNotify\' failed");
-            return true;
-        }
-        err = reply.readBool(&result);
-        if (err != NO_ERROR) {
-            ALOGE("IProducerListener: malformed binder reply");
-            return true;
-        }
-        return result;
     }
 };
 
@@ -70,16 +52,8 @@ status_t BnProducerListener::onTransact(uint32_t code, const Parcel& data,
             CHECK_INTERFACE(IProducerListener, data, reply);
             onBufferReleased();
             return NO_ERROR;
-        case NEEDS_RELEASE_NOTIFY:
-            CHECK_INTERFACE(IProducerListener, data, reply);
-            reply->writeBool(needsReleaseNotify());
-            return NO_ERROR;
     }
     return BBinder::onTransact(code, data, reply, flags);
-}
-
-bool BnProducerListener::needsReleaseNotify() {
-    return true;
 }
 
 } // namespace android

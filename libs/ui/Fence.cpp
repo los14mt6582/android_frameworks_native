@@ -67,12 +67,15 @@ status_t Fence::waitForever(const char* logname) {
     if (err < 0 && errno == ETIME) {
         ALOGE("%s: fence %d didn't signal in %u ms", logname, mFenceFd,
                 warningTimeout);
+	dump(mFenceFd);
         err = sync_wait(mFenceFd, TIMEOUT_NEVER);
     }
     return err < 0 ? -errno : status_t(NO_ERROR);
 }
 
-sp<Fence> Fence::merge(const char* name, const sp<Fence>& f1,
+
+
+sp<Fence> Fence::merge(const String8& name, const sp<Fence>& f1,
         const sp<Fence>& f2) {
     ATRACE_CALL();
     int result;
@@ -80,27 +83,22 @@ sp<Fence> Fence::merge(const char* name, const sp<Fence>& f1,
     // valid fence (e.g. NO_FENCE) we merge the one valid fence with itself so
     // that a new fence with the given name is created.
     if (f1->isValid() && f2->isValid()) {
-        result = sync_merge(name, f1->mFenceFd, f2->mFenceFd);
+        result = sync_merge(name.string(), f1->mFenceFd, f2->mFenceFd);
     } else if (f1->isValid()) {
-        result = sync_merge(name, f1->mFenceFd, f1->mFenceFd);
+        result = sync_merge(name.string(), f1->mFenceFd, f1->mFenceFd);
     } else if (f2->isValid()) {
-        result = sync_merge(name, f2->mFenceFd, f2->mFenceFd);
+        result = sync_merge(name.string(), f2->mFenceFd, f2->mFenceFd);
     } else {
         return NO_FENCE;
     }
     if (result == -1) {
         status_t err = -errno;
         ALOGE("merge: sync_merge(\"%s\", %d, %d) returned an error: %s (%d)",
-                name, f1->mFenceFd, f2->mFenceFd,
+                name.string(), f1->mFenceFd, f2->mFenceFd,
                 strerror(-err), err);
         return NO_FENCE;
     }
     return sp<Fence>(new Fence(result));
-}
-
-sp<Fence> Fence::merge(const String8& name, const sp<Fence>& f1,
-        const sp<Fence>& f2) {
-    return merge(name.string(), f1, f2);
 }
 
 int Fence::dup() const {
@@ -162,7 +160,7 @@ status_t Fence::unflatten(void const*& buffer, size_t& size, int const*& fds, si
         return INVALID_OPERATION;
     }
 
-    if (size < getFlattenedSize()) {
+    if (size < 1) {
         return NO_MEMORY;
     }
 
